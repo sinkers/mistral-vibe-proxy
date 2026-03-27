@@ -29,7 +29,25 @@ PORT    = 8080
 python3 proxy.py
 ```
 
-No dependencies — stdlib only.
+Requires Flask and requests (`pip install flask requests`). Hot reloads on file changes.
+
+## Tool calling
+
+Vibe sends tool definitions (file read, bash, etc.) so the model can act as a coding agent. Getting this working required several fixes:
+
+**vLLM must be started with Mistral's tool call parser:**
+```
+--enable-auto-tool-choice --tool-call-parser mistral
+```
+Without these flags the model never emits structured tool calls regardless of what the proxy sends.
+
+**The `injected` field must be stripped from messages.** Vibe adds `"injected": false` to system messages, which vLLM's Pydantic validation rejects with a 400 error.
+
+**The Vibe system prompt must be dropped.** Vibe sends a long (~8000 token) system prompt describing its "Orient / Plan / Execute" workflow. With this prompt the model ignores the tool definitions and writes pseudo-code text instead of making structured tool calls. Dropping the system message restores normal tool-calling behaviour.
+
+This is controlled by the `DROP_SYSTEM_MESSAGE` flag in `proxy.py`. Set to `False` if you want to experiment with a custom system prompt — keep it short and avoid instructing the model on how to structure its responses, as this interferes with tool use.
+
+**Python's default User-Agent is blocked by RunPod's reverse proxy.** The proxy spoofs `User-Agent: curl/7.88.1` to avoid 403 errors.
 
 ## Vibe config (`~/.vibe/config.toml`)
 
