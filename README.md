@@ -65,3 +65,75 @@ provider = "llamacpp"
 alias = "local"
 temperature = 0.2
 ```
+
+## Setting up the pod at RunPod
+
+1. **Signup**: Create an account on RunPod if you don't have one already.
+2. **Go to pod templates**: Navigate to the pod templates section and select the `vLLM Latest` template.
+3. **Configure pod**: Set up the pod configuration as needed.
+4. **Pick the biggest instance you can afford**: Choose the largest instance you can afford, ensuring it has at least 40GB of VRAM to run the Devstral 2 Small model with a 128 context.
+5. **Use this as the pod start command**: Use the following command to start the pod, replacing `<your-api-key>` with your actual API key:
+   ```
+   --model cyankiwi/Devstral-Small-2-24B-Instruct-2512-AWQ-4bit --enable-auto-tool-choice --tool-call-parser mistral --max-model-len 131072 --gpu-memory-utilization 0.90 --api-key <your-api-key>
+   ```
+6. **Start the pod and check logs**: Start the pod and monitor the System and Container logs for any errors. If everything looks good, proceed to testing.
+
+## Testing
+
+After setting up the pod, ensure that everything is working as expected by running a few test queries. Verify that the model responds correctly and that all tools are functioning properly.
+
+## Setting up the local config and running the proxy
+
+### Local Configuration
+
+To use the proxy with Mistral Vibe, you need to configure the local Vibe settings. Here's how you can set it up:
+
+1. **Edit the Vibe config file**: Open the `~/.vibe/config.toml` file in a text editor.
+2. **Add the proxy provider**: Ensure that the `llamacpp` provider is configured to point to the proxy:
+   ```toml
+   [[providers]]
+   name = "llamacpp"
+   api_base = "http://127.0.0.1:8080/v1"
+   api_key_env_var = ""
+   api_style = "openai"
+   backend = "generic"
+   ```
+3. **Add the model**: Add the model configuration to use the proxy:
+   ```toml
+   [[models]]
+   name = "devstral"
+   provider = "llamacpp"
+   alias = "local"
+   temperature = 0.2
+   ```
+4. **Save the file**: Save the changes to the config file.
+
+### Running the Proxy
+
+1. **Start the proxy**: Run the proxy using the following command:
+   ```bash
+   python3 proxy.py
+   ```
+2. **Check the logs**: To monitor the proxy's activity, you can tail the logs using the following command:
+   ```bash
+   tail -f proxy.log
+   ```
+3. **Test the setup**: Once the proxy is running, test the setup by sending a request to the proxy endpoint. Ensure that the model responds correctly and that all tools are functioning as expected.
+
+### Tips for Tailing Logs
+
+- Use `tail -f proxy.log` to continuously monitor the log file for real-time updates.
+- Use `grep` to filter specific log entries. For example, to filter error logs:
+  ```bash
+  grep -i "error" proxy.log
+  ```
+- Use `less` to view the log file in a paginated manner:
+  ```bash
+  less proxy.log
+  ```
+- Use `journalctl` if the proxy is running as a systemd service:
+  ```bash
+  journalctl -u proxy.service -f
+  ```
+
+By following these steps, you can ensure that the proxy is correctly set up and running smoothly with Mistral Vibe.
