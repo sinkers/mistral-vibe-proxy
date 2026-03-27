@@ -1,0 +1,13 @@
+[Unit]
+Description=Mistral Vibe Proxy Service
+After=network.target
+
+[Service]
+User=your_username
+WorkingDirectory=/path/to/proxy/directory
+ExecStart=/usr/bin/python3 /path/to/proxy/directory/proxy.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
