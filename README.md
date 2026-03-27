@@ -137,3 +137,76 @@ To use the proxy with Mistral Vibe, you need to configure the local Vibe setting
   ```
 
 By following these steps, you can ensure that the proxy is correctly set up and running smoothly with Mistral Vibe.
+
+## Running the Proxy as a Systemd Service
+
+To run the proxy as a background service using systemd, follow these steps:
+
+1. **Create a systemd service file**: Create a new file named `proxy.service` in the `/etc/systemd/system/` directory:
+   ```bash
+   sudo nano /etc/systemd/system/proxy.service
+   ```
+
+2. **Add the following content to the file**:
+   ```ini
+   [Unit]
+   Description=Mistral Vibe Proxy Service
+   After=network.target
+   
+   [Service]
+   User=your_username
+   WorkingDirectory=/path/to/proxy/directory
+   ExecStart=/usr/bin/python3 /path/to/proxy/directory/proxy.py
+   Restart=always
+   RestartSec=10
+   
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   Replace `your_username` with your actual username and `/path/to/proxy/directory` with the path to the directory where the proxy is located.
+
+3. **Reload systemd**: After saving the file, reload systemd to recognize the new service:
+   ```bash
+   sudo systemctl daemon-reload
+   ```
+
+4. **Start the service**: Start the proxy service:
+   ```bash
+   sudo systemctl start proxy.service
+   ```
+
+5. **Enable the service**: Enable the service to start automatically on boot:
+   ```bash
+   sudo systemctl enable proxy.service
+   ```
+
+6. **Check the service status**: Verify that the service is running correctly:
+   ```bash
+   sudo systemctl status proxy.service
+   ```
+
+7. **View logs**: To view the logs for the proxy service, use:
+   ```bash
+   journalctl -u proxy.service -f
+   ```
+
+By following these steps, you can ensure that the proxy runs in the background as a systemd service and automatically restarts if it crashes.
+
+## Dependencies
+
+The proxy requires the following dependencies:
+
+- Flask
+- requests
+
+You can install them using pip:
+
+```bash
+pip install -r requirements.txt
+```
+
+Or manually:
+
+```bash
+pip install Flask==3.0.0 requests==2.31.0
+```
